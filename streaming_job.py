@@ -1,11 +1,13 @@
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql.types import StructType, StructField, StringType, TimestampType
+import time
 
 spark = (
     SparkSession.builder
     .appName("NewsPulse")
     .master("local[*]")
+    .config("spark.sql.streaming.schemaInference", "true")
     .getOrCreate()
 )
 
@@ -75,5 +77,7 @@ q_words = (
 
 print("Streaming job started.")
 print("Memory tables: by_source, by_window, top_words")
+print("\nWaiting for data to arrive from ingester...")
+print("This may take a few seconds to process the first batch...\n")
 
 spark.streams.awaitAnyTermination()

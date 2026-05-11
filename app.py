@@ -69,20 +69,41 @@ st.title("News Pulse - Live Dashboard")
 
 st.write("This dashboard shows live RSS headline trends using PySpark Structured Streaming.")
 
+# Show available tables for debugging
+with st.expander("🔍 Debug Info"):
+    try:
+        tables = spark.sql("SHOW TABLES").collect()
+        table_names = [row.tableName for row in tables]
+        st.write(f"Available tables: {table_names if table_names else 'None yet'}")
+        st.write(f"Total memory tables: {len(table_names)}")
+    except Exception as e:
+        st.write(f"Debug error: {e}")
+
+st.markdown("---")
+
+# Auto-refresh capability
+col1, col2 = st.columns([1, 5])
+with col1:
+    if st.button("🔄 Refresh"):
+        st.rerun()
+with col2:
+    st.caption(f"Last updated: {pd.Timestamp.now().strftime('%H:%M:%S')}")
 try:
     source_df = spark.sql("SELECT * FROM by_source").toPandas()
-except:
+except Exception as e:
+    st.warning(f"Source data loading: {str(e)[:100]}")
     source_df = pd.DataFrame(columns=["source", "count"])
 
 try:
     window_df = spark.sql("""
         SELECT 
-            window.start AS hour,
+            CAST(window.start AS STRING) AS hour,
             count
         FROM by_window
         ORDER BY hour
     """).toPandas()
-except:
+except Exception as e:
+    st.warning(f"Window data loading: {str(e)[:100]}")
     window_df = pd.DataFrame(columns=["hour", "count"])
 
 try:
@@ -92,7 +113,8 @@ try:
         ORDER BY count DESC
         LIMIT 10
     """).toPandas()
-except:
+except Exception as e:
+    st.warning(f"Keyword data loading: {str(e)[:100]}")
     words_df = pd.DataFrame(columns=["word", "count"])
 
 col1, col2 = st.columns(2)
