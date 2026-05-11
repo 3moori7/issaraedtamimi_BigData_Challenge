@@ -56,3 +56,6 @@ streamlit run app.py
 - `app.py`: Streamlit frontend with LLM integration.
 - `REFLECTION.md`: Analysis of system scalability.
 - `data/`: Local storage for raw and processed data.
+
+<img width="1649" height="920" alt="image" src="https://github.com/user-attachments/assets/f8156345-6154-4c6f-8c1d-23bbd08a8c4a" />
+
