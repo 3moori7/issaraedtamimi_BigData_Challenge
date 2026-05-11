@@ -3,6 +3,10 @@ import pandas as pd
 from pyspark.sql import SparkSession
 import os
 from openai import OpenAI
+from dotenv import load_dotenv
+
+# Load environment variables from .env file (explicitly from current directory)
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 spark = (
     SparkSession.builder
@@ -12,7 +16,12 @@ spark = (
 )
 
 # Initialize OpenAI client from environment variable
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    st.error("❌ OPENAI_API_KEY not found. Please set it in .env file or environment.")
+    st.stop()
+
+client = OpenAI(api_key=api_key)
 
 def generate_llm_summary(top_keywords):
     """
