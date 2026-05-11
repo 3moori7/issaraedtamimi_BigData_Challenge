@@ -2,6 +2,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql.types import StructType, StructField, StringType, TimestampType
 import time
+import os
 
 spark = (
     SparkSession.builder
@@ -31,11 +32,14 @@ by_source = (
     .count()
 )
 
+def write_to_json(df, epoch_id, filename):
+    path = os.path.join("data/processed", filename)
+    df.toPandas().to_json(path, orient="records")
+
 q_source = (
     by_source.writeStream
     .outputMode("complete")
-    .format("memory")
-    .queryName("by_source")
+    .foreachBatch(lambda df, epoch: write_to_json(df, epoch, "by_source.json"))
     .start()
 )
 
@@ -48,8 +52,7 @@ by_window = (
 q_window = (
     by_window.writeStream
     .outputMode("complete")
-    .format("memory")
-    .queryName("by_window")
+    .foreachBatch(lambda df, epoch: write_to_json(df, epoch, "by_window.json"))
     .start()
 )
 
@@ -70,13 +73,12 @@ top_words = (
 q_words = (
     top_words.writeStream
     .outputMode("complete")
-    .format("memory")
-    .queryName("top_words")
+    .foreachBatch(lambda df, epoch: write_to_json(df, epoch, "top_words.json"))
     .start()
 )
 
 print("Streaming job started.")
-print("Memory tables: by_source, by_window, top_words")
+print("Saving latest state to: data/processed/*.json")
 print("\nWaiting for data to arrive from ingester...")
 print("This may take a few seconds to process the first batch...\n")
 

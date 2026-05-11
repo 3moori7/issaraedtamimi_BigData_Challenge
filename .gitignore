@@ -19,3 +19,6 @@ spark-warehouse/
 .vscode/
 .idea/
 *.swp
+
+# Project data
+data/
