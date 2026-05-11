@@ -1,7 +1,7 @@
 import os
 import json
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 import feedparser
 
 INCOMING = "data/incoming"
@@ -26,7 +26,7 @@ def pull_once(tick):
                     "source": source,
                     "title": entry.get("title", ""),
                     "url": entry.get("link", ""),
-                    "ts": datetime.utcnow().isoformat()
+                    "ts": datetime.now(timezone.utc).isoformat()
                 })
 
         except Exception as e:
